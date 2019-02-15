@@ -1,0 +1,23 @@
+<resources>
+    <string name="app_name">TranslatorByAdil</string>
+    <string-array name="select_lang">
+        <item>English</item>
+        <item>Russian</item>
+        <item>German</item>
+        <item>Kyrgyz</item>
+        <item>Korean</item>
+        <item>Chinese</item>
+        <item>Spain</item>
+        <item>Japanese</item>
+    </string-array>
+    <string-array name="select_lang2">
+        <item>Russian</item>
+        <item>English</item>
+        <item>German</item>
+        <item>Kyrgyz</item>
+        <item>Korean</item>
+        <item>Chinese</item>
+        <item>Spain</item>
+        <item>Japanese</item>
+    </string-array>
+</resources>

@@ -4,7 +4,6 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.Spinner;
@@ -14,17 +13,16 @@ import android.widget.Toast;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
-import retrofit2.Retrofit;
-import retrofit2.converter.gson.GsonConverterFactory;
 
 public class MainActivity extends AppCompatActivity implements AdapterView.OnItemSelectedListener {
     private static final String KEY = "trnsl.1.1.20190212T111345Z.f1fdb70e3a66aba2.c2732bc7a4a2bdb812737805ef5d1cbea7c752da";
     private EditText mEditText;
     private ImageButton mButtonTranslate;
-    private Spinner spinner;
-    private Spinner startSpinner;
-    private String language;
-    private String startLanguage;
+    private Spinner fromSpinner;
+    private Spinner toSpinner;
+    private String fromLanguage;
+    private String toLanguage;
+    private String currentWord;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,42 +32,28 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         final TextView tvResult = findViewById(R.id.tv_result);
         mEditText = findViewById(R.id.edit_text);
         mButtonTranslate = findViewById(R.id.b_translate);
-        spinner = findViewById(R.id.spinner);
-        startSpinner = findViewById(R.id.start_spinner);
+        toSpinner = findViewById(R.id.spinner);
+        fromSpinner = findViewById(R.id.start_spinner);
 
-        Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl("https://translate.yandex.net/api/v1.5/tr.json/")
-                .addConverterFactory(GsonConverterFactory.create())
-                .build();
+        //устанавливаем спинерам слушателей, чтобы определять какой язык был нажат
+        toSpinner.setOnItemSelectedListener(this);
+        fromSpinner.setOnItemSelectedListener(this);
 
-        final JsonPlaceHolderApi jsonPlaceHolderApi = retrofit.create(JsonPlaceHolderApi.class);
-
-        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
-                    R.array.select_lang, android.R.layout.simple_spinner_dropdown_item);
-
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-
-        startSpinner.setAdapter(adapter);
-
-        ArrayAdapter<CharSequence> adapter2 = ArrayAdapter.createFromResource(this,
-                R.array.select_lang2, android.R.layout.simple_spinner_dropdown_item);
-
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-
-        spinner.setAdapter(adapter2);
-
-        spinner.setOnItemSelectedListener(this);
-        startSpinner.setOnItemSelectedListener(this);
-
+        //Кнопке стрелке, устанавливаем слушателя при котором изменяются параметры url-ссылки
+        // и возрвращаются нужный метод api
         mButtonTranslate.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String currentWord = mEditText.getText().toString();
+                // получаем текст
+                currentWord = mEditText.getText().toString();
 
+                //если поле ввода пустое, выводим уведомление
                 if (currentWord.isEmpty()) {
                     Toast.makeText(MainActivity.this,"Text field is empty!",Toast.LENGTH_SHORT).show();
                 } else {
-                    final Call<Word> word = jsonPlaceHolderApi.getWord(startLanguage + "-" + language, currentWord, KEY);
+                    Call<Word> word = NetworkService.getInstance()
+                            .getJSONApi()
+                            .getWord(fromLanguage + "-" + toLanguage, currentWord, KEY);
 
                     word.enqueue(new Callback<Word>() {
                         @Override
@@ -88,61 +72,61 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
             }
         });
     }
-
+    // в зависимости от спиннера назначаем значение переменным fromLanguage и toLanguage
     @Override
     public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
         if (parent.getId() == R.id.start_spinner) {
             switch (position) {
                 case 0:
-                    startLanguage = "en";
+                    fromLanguage = "ru";
                     break;
                 case 1:
-                    startLanguage = "ru";
+                    fromLanguage = "en";
                     break;
                 case 2:
-                    startLanguage = "de";
+                    fromLanguage = "de";
                     break;
                 case 3:
-                    startLanguage = "ky";
+                    fromLanguage = "ky";
                     break;
                 case 4:
-                    startLanguage = "ko";
+                    fromLanguage = "ko";
                     break;
                 case 5:
-                    startLanguage = "zh";
+                    fromLanguage = "zh";
                     break;
                 case 6:
-                    startLanguage = "es";
+                    fromLanguage = "es";
                     break;
                 case 7:
-                    startLanguage = "ja";
+                    fromLanguage = "ja";
                     break;
             }
         } else if (parent.getId() == R.id.spinner) {
             switch (position) {
                 case 0:
-                    language = "ru";
+                    toLanguage = "en";
                     break;
                 case 1:
-                    language = "en";
+                    toLanguage = "ru";
                     break;
                 case 2:
-                    language = "de";
+                    toLanguage = "de";
                     break;
                 case 3:
-                    language = "ky";
+                    toLanguage = "ky";
                     break;
                 case 4:
-                    language = "ko";
+                    toLanguage = "ko";
                     break;
                 case 5:
-                    language = "zh";
+                    toLanguage = "zh";
                     break;
                 case 6:
-                    language = "es";
+                    toLanguage = "es";
                     break;
                 case 7:
-                    language = "ja";
+                    toLanguage = "ja";
                     break;
             }
         }
@@ -153,7 +137,6 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
     public void onNothingSelected(AdapterView<?> parent) {
 
     }
-
 
 }
 
